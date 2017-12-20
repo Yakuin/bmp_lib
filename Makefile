@@ -1,10 +1,10 @@
 NAME =	bmp_gen
 
-SRC =	bmp_gen.c \
+SRC =	bmp_gen.c
 
 OBJ =	$(SRC:.c=.o)
 
-FLG = -Wextra -Wall -Werror -Wpadded
+FLG = -Wextra -Wall -Werror
 
 CFLAGS = -g
 
