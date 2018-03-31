@@ -2,13 +2,9 @@
 # define BMP_GEN_H
 
 # include <stdio.h>
-# include <stdbool.h>
-# include <math.h>
 # include <stdlib.h>
 # include <string.h>
 
-# define WIN_WIDTH 800
-# define WIN_HEIGHT 600
 # define SUCCESS 1
 # define FAILURE 0
 
@@ -44,16 +40,18 @@ typedef struct	        s_bmp_image_header {
 }				        t_bmp_image_header;
 #pragma pack(pop)
 
-typedef struct	        s_env {
-    FILE                *image;
-    unsigned char       *data;
+typedef struct	        s_bmp {
+    FILE*               image;
+    unsigned char*      data;
     t_bmp_file_header   fh;
     t_bmp_image_header  ih;
-}				        t_env;
+    int                 img_width;
+    int                 img_height;
+}				        t_bmp;
 
-int     init(t_env *e);
-int     fileWriteInit(t_env *e, const char *filename);
-void    bmpHeaderInit(t_env *e);
-void    fileWrite(t_env *e);
+t_bmp*  bmpInit(int img_width, int img_height, const char *filename);
+void    drawPixel(t_bmp *e, int x, int y, unsigned char r, unsigned char g, unsigned char b);
+void    fileWrite(t_bmp *e);
+void    clear(t_bmp *e);
 
 #endif

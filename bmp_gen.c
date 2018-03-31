@@ -1,33 +1,8 @@
 #include "bmp_gen.h"
 
-// Initialize structures (header / file) and memory allocation
-int                 init(t_env *e) {
-    e->data = (unsigned char*)malloc(sizeof(unsigned char) * (WIN_WIDTH * WIN_HEIGHT * 3));
-    if (e->data == NULL) {
-        printf("Error during memory allocation !");
-        return FAILURE;
-    }
-    bmpHeaderInit(e);
-
-    if (fileWriteInit(e, "filetest.bmp") == FAILURE) {
-        printf("Error during bitmap file creation !");
-        return FAILURE;
-    }
-    return SUCCESS;
-}
-
-// Open file and get a pointer to the FILE object created
-int                fileWriteInit(t_env *e, const char *filename) {
-    e->image = fopen(filename, "wb");
-    if (e->image != NULL)
-        return SUCCESS;
-    else
-        return FAILURE;
-}
-
-void            bmpHeaderInit(t_env *e) {
+void    bmpHeaderInit(t_bmp *e) {
     int         dpi = 96;
-    int         image_size = WIN_WIDTH * WIN_HEIGHT;
+    int         image_size = e->img_width * e->img_height;
     int         file_size = 54 + 4 * image_size;
     int         ppm = dpi * 39.375;
 
@@ -40,8 +15,8 @@ void            bmpHeaderInit(t_env *e) {
 
     // Write Image Header (40 bytes)
     e->ih.size_header = sizeof(t_bmp_image_header);
-    e->ih.width = WIN_WIDTH;
-    e->ih.height = WIN_HEIGHT;
+    e->ih.width = e->img_width;
+    e->ih.height = e->img_height;
     e->ih.planes = 1;
     e->ih.bit_count = 24;
     e->ih.compression = 0;
@@ -52,7 +27,37 @@ void            bmpHeaderInit(t_env *e) {
     e->ih.clr_important = 0;
 }
 
-void                fileWrite(t_env *e) {
+// Open file and get a pointer to the FILE object created
+int     fileWriteInit(t_bmp *e, const char *filename) {
+    e->image = fopen(filename, "wb");
+    if (e->image != NULL)
+        return SUCCESS;
+    else
+        return FAILURE;
+}
+
+// Initialize structures (header / file) and memory allocation
+t_bmp*  bmpInit(int img_width, int img_height, const char *filename) {
+    t_bmp   *e;
+
+    e = (t_bmp*)malloc(sizeof(t_bmp));
+    e->data = (unsigned char*)malloc(sizeof(unsigned char) * (img_width * img_height * 3));
+    if (e->data == NULL) {
+        printf("Error during memory allocation !");
+        return NULL;
+    }
+    e->img_height = 800;
+    e->img_width = 600;
+    bmpHeaderInit(e);
+
+    if (fileWriteInit(e, filename) == FAILURE) {
+        printf("Error during bitmap file creation !");
+        return NULL;
+    }
+    return (e);
+}
+
+void    fileWrite(t_bmp *e) {
     unsigned char   bmppad[3] = {0,0,0};
     int             i;
 
@@ -60,49 +65,23 @@ void                fileWrite(t_env *e) {
     fwrite(&e->fh, 1, 14, e->image);
     fwrite(&e->ih, 1, 40, e->image);
 
-    // Write data + padding when necessary
+    // Write data (+ padding when necessary)
     i = 0;
-    for(i = 0; i < WIN_HEIGHT; i++)
+    for(i = 0; i < e->img_height; i++)
     {
-        fwrite(e->data + (WIN_WIDTH * (WIN_HEIGHT - i - 1) * 3), 3, WIN_WIDTH, e->image);
-        fwrite(bmppad, 1, (4 - (WIN_WIDTH * 3) % 4) % 4,e->image);
+        fwrite(e->data + (e->img_width * (e->img_height - i - 1) * 3), 3, e->img_width, e->image);
+        fwrite(bmppad, 1, (4 - (e->img_width * 3) % 4) % 4, e->image);
     }
 }
 
 // Draw a pixel in a specific (x,y) position
-void                drawPixel(t_env *e, int x, int y, t_color pix) {
+void    drawPixel(t_bmp *e, int x, int y, unsigned char r, unsigned char g, unsigned char b) {
     int         i;
     int         j;
 
     i = x;
-    j = (WIN_HEIGHT - 1) - y;
-    e->data[(i + j * WIN_WIDTH) * 3 + 2] = (unsigned char)(pix.r);
-    e->data[(i + j * WIN_WIDTH) * 3 + 1] = (unsigned char)(pix.g);
-    e->data[(i + j * WIN_WIDTH) * 3 + 0] = (unsigned char)(pix.b);
-}
-
-int                 main (void) {
-    t_env       *e;
-    t_color     pix;
-    int         x;
-    int         y;
-
-    e = (t_env*)malloc(sizeof(t_env));
-    if (init(e) == FAILURE) {
-        printf("Bitmap file creation failed, exiting...");
-        return 1;
-    }
-
-    pix.r = 0;
-    pix.g = 50;
-    pix.b = 255;
-
-    for (x = 0; x < WIN_WIDTH; x++) {
-        for (y = 0; y < WIN_HEIGHT; y++) {
-            drawPixel(e, x, y, pix);
-        }
-    }
-
-    fileWrite(e);
-    return 0;
+    j = (e->img_height - 1) - y;
+    e->data[(i + j * e->img_height) * 3 + 2] = (unsigned char)(r);
+    e->data[(i + j * e->img_height) * 3 + 1] = (unsigned char)(g);
+    e->data[(i + j * e->img_height) * 3 + 0] = (unsigned char)(b);
 }

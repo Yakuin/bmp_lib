@@ -4,17 +4,24 @@ SRC =	bmp_gen.c
 
 OBJ =	$(SRC:.c=.o)
 
-FLG = -Wextra -Wall -Werror
+FLG = 	-Wextra -Wall -Werror
 
 CFLAGS = -g
 
+
 $(NAME): $(OBJ)
-	@echo "Compiling BMP Generator..."
-	@gcc -g -c -Ofast $(FLG) $(SRC)
-	@gcc -g -o $(NAME) $(OBJ)
+	@echo "Compiling..."
+	@gcc -c $(FLG) $(SRC)
+	@ar rc $(NAME) $(OBJ)
+	@ranlib $(NAME)
 	@echo "Done !"
 
-all: $(NAME)
+debug:
+	@echo "Compiling (DEBUG SYMBOLS)..."
+	@gcc -g -c $(FLG) $(SRC)
+	@ar rc $(NAME) $(OBJ)
+	@ranlib $(NAME)
+	@echo "Done !"
 
 clean:
 	@echo "Deleting object files..."
@@ -27,5 +34,3 @@ fclean: clean
 	@echo "Done !"
 
 re: fclean all
-
-.PHONY: all clean fclean re
