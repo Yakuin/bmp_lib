@@ -33,4 +33,4 @@ fclean: clean
 	@rm -f $(NAME)
 	@echo "Done !"
 
-re: fclean all
+re: fclean $(NAME)
