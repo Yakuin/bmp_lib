@@ -1,9 +1,9 @@
 # BMP Generator
 
-An extremely basic BMP library in C, with no dependencies, except for the standard library.
+An extremely basic BMP library written in C with no dependencies, except for the standard library.
 
 ## Prerequisite
-Make sure you have gcc and make installed on your machine.
+Make sure you have `gcc` and `make` installed on your machine.
 
 ## Build
 To compile, open a terminal and just type :
